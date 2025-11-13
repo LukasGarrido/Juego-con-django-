@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego</title>
+</head>
+<body>
+    <h1>Camino del Juego</h1>
+    <canvas id="canvas" width="1500" height="800"></canvas>
+
+    <script>
+        // Obtener el canvas y contexto
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Paredes que envía Django
+        const paredes = {{ paredes|safe }};
+
+        // Dibujar cada pared
+        paredes.forEach(p => {
+            ctx.beginPath();
+            ctx.moveTo(p.x1, p.y1);
+            ctx.lineTo(p.x2, p.y2);
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 5;
+            ctx.stroke();
+        });
+    </script>
+</body>
+</html>
