@@ -1,7 +1,7 @@
 import cv2
 from juego.models import Personaje, Pared
 import numpy as np
-
+import random 
 def generar_fondo():
     fondo = np.ones((1000, 1500, 3), dtype=np.uint8) * 255
     return fondo
@@ -26,5 +26,37 @@ def generar_pared():
 
 
 def generar_personaje():
-    return
+    nombre_personaje = "personaje1"
+    ruta = "/static/img/devil.png"
+    x = 100
+    y = 100
+    Personaje.objects.all().delete()
+    return Personaje.objects.create(nombre = nombre_personaje, imagen= ruta, x = x, y = y)
 
+"""
+    def movimiento_ilimitado(self, key, fondo):
+        if key == ord('d'):
+            self.x += self.velocidad
+        elif key == ord('a'):
+            self.x -= self.velocidad
+        elif key == ord('w'):
+            self.y -= self.velocidad
+        elif key == ord('s'):
+            self.y += self.velocidad
+"""
+def mover_personaje(personaje, key, fondo):
+    if key == ord('d'):
+        personaje.x += personaje.velocidad
+    elif key == ord('a'):
+        personaje.x -= personaje.velocidad
+    elif key == ord('w'):
+        personaje.y -= personaje.velocidad
+    elif key == ord('s'):
+        personaje.y += personaje.velocidad
+    
+    x, y = fondo.shape[:2]
+
+    x_min = 50
+    x_max = x - personaje.ancho
+    y_min = 100
+    y_max = y - personaje.alto

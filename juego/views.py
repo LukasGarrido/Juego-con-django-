@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from .models import Pared, Personaje
-from juego.generar_juego.jugando import generar_pared
+from juego.generar_juego.jugando import generar_pared, generar_fondo, generar_personaje
 # Create your views here.
 
 def inicio(request):
@@ -8,6 +8,8 @@ def inicio(request):
 
 def juego(request):
     generar_pared()
+    personajes = generar_personaje()
+
     paredes = []
     for pared in Pared.objects.all():
         x1, y1 = map(int, pared.inicio.split(','))
@@ -19,4 +21,17 @@ def juego(request):
             'y2': y2,
             'direccion': pared.direccion
         })
-    return render(request, 'juego.html', {'paredes': paredes})
+
+    personaje = Personaje.objects.first()
+
+    personaje_dict = {
+        "nombre": personaje.nombre,
+        "imagen": personaje.imagen,
+        "x": personaje.x,
+        "y": personaje.y
+    }
+
+    return render(request, "juego.html", {
+        'paredes': paredes,
+        'personaje': personaje_dict
+    })
