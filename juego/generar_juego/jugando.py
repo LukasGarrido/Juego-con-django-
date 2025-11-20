@@ -7,6 +7,7 @@ def generar_fondo():
     return fondo
 
 def generar_pared():
+    Pared.objects.all().delete()
     coordenadas = [
         ((50, 100), (1200, 100), 'H'),  #horizontal 1 
         ((50, 300), (900, 300), 'H'),  # horizontal 2
@@ -15,14 +16,38 @@ def generar_pared():
         ((900,500), (50,500), 'V'), #horizontal 3
         ((1200,700), (50,700), 'H'), #horizontal 4
     ]
-    Pared.objects.all().delete()
-
+    
     fondo = np.ones((800, 1500, 3), dtype=np.uint8) * 255
 
     for i, f, dirc in coordenadas:
         inicio_str = f"{i[0]},{i[1]}"
         final_str = f"{f[0]},{f[1]}"
         Pared.objects.create(inicio=inicio_str, final=final_str, direccion=dirc)
+    
+    for _ in range(25):
+
+        # dirección al azar
+        direccion = random.choice(['H', 'V'])
+
+        if direccion == 'H':
+            x1 = random.randint(60, 1150)
+            y1 = random.randint(120, 680)
+            largo = random.randint(50, 200)
+            x2 = x1 + largo
+            y2 = y1
+        else:
+            x1 = random.randint(60, 1150)
+            y1 = random.randint(120, 680)
+            largo = random.randint(50, 200)
+            x2 = x1
+            y2 = y1 + largo
+
+        # crear pared
+        Pared.objects.create(
+            inicio=f"{x1},{y1}",
+            final=f"{x2},{y2}",
+            direccion=direccion
+        )
 
 
 def generar_personaje():
@@ -33,30 +58,25 @@ def generar_personaje():
     Personaje.objects.all().delete()
     return Personaje.objects.create(nombre = nombre_personaje, imagen= ruta, x = x, y = y)
 
-"""
-    def movimiento_ilimitado(self, key, fondo):
-        if key == ord('d'):
-            self.x += self.velocidad
-        elif key == ord('a'):
-            self.x -= self.velocidad
-        elif key == ord('w'):
-            self.y -= self.velocidad
-        elif key == ord('s'):
-            self.y += self.velocidad
-"""
-def mover_personaje(personaje, key, fondo):
-    if key == ord('d'):
-        personaje.x += personaje.velocidad
-    elif key == ord('a'):
-        personaje.x -= personaje.velocidad
-    elif key == ord('w'):
-        personaje.y -= personaje.velocidad
-    elif key == ord('s'):
-        personaje.y += personaje.velocidad
-    
-    x, y = fondo.shape[:2]
 
-    x_min = 50
-    x_max = x - personaje.ancho
-    y_min = 100
-    y_max = y - personaje.alto
+def mover_personaje(personaje, dx, dy):
+    
+    nuevo_x = personaje.x + dx
+    nuevo_y = personaje.y + dy
+
+    # límites del canvas
+    min_x = 0
+    max_x = 1450
+    min_y = 0
+    max_y = 750
+
+    if nuevo_x < min_x: nuevo_x = min_x
+    if nuevo_x > max_x: nuevo_x = max_x
+    if nuevo_y < min_y: nuevo_y = min_y
+    if nuevo_y > max_y: nuevo_y = max_y
+
+    personaje.x = nuevo_x
+    personaje.y = nuevo_y
+    personaje.save()
+
+    return personaje

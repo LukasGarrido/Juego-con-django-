@@ -28,10 +28,11 @@ def juego(request):
         "nombre": personaje.nombre,
         "imagen": personaje.imagen,
         "x": personaje.x,
-        "y": personaje.y
+        "y": personaje.y,
+        "velocidad": personajes.velocidad
     }
 
     return render(request, "juego.html", {
         'paredes': paredes,
-        'personaje': personaje_dict
+        'personaje': personaje_dict 
     })

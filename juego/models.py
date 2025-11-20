@@ -7,7 +7,7 @@ class Personaje(models.Model):
     imagen = models.CharField(max_length=1000)
     x = models.IntegerField()
     y = models.IntegerField()
-
+    velocidad = models.IntegerField(default=10)
     def __str__(self):
         return f"{self.nombre} con posicion ({self.x},{self.y})"
 

@@ -9,41 +9,58 @@
 
 <body>
     <h1>Camino del Juego</h1>
-    <canvas id="canvas" width="1500" height="800" style="border:1px solid black"></canvas>
+    <canvas id="canvas" width="1500" height="800"></canvas>
 
     <script>
+        // === OBTENER CANVAS ===
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
 
-        // Recibir datos desde Django
-        const paredes = {{ paredes| safe }};
-        const personaje = {{ personaje| safe }};
+        // === DATOS DESDE DJANGO ===
+        const paredes = {{ paredes|safe }};
+        const personaje = {
+            x: {{ personaje.x }},
+            y: {{ personaje.y }},
+            imagen: "{{ personaje.imagen }}",
+        };
 
-        console.log("Paredes:", paredes);
-        console.log("Personaje:", personaje);
+        // === CARGAR IMAGEN DEL PERSONAJE ===
+        const img = new Image();
+        img.src = personaje.imagen;
 
-        // --- DIBUJAR PAREDES ---
-        paredes.forEach(p => {
-            ctx.beginPath();
-            ctx.moveTo(p.x1, p.y1);
-            ctx.lineTo(p.x2, p.y2);
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 5;
-            ctx.stroke();
+        img.onload = function () {
+            dibujarTodo();
+        };
+
+        // === FUNCIÓN QUE DIBUJA TODAS LAS COSAS ===
+        function dibujarTodo() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Dibujar paredes
+            paredes.forEach(p => {
+                ctx.beginPath();
+                ctx.moveTo(p.x1, p.y1);
+                ctx.lineTo(p.x2, p.y2);
+                ctx.strokeStyle = "black";
+                ctx.lineWidth = 5;
+                ctx.stroke();
+            });
+
+            // Dibujar personaje
+            ctx.drawImage(img, personaje.x, personaje.y, 50, 50);
+        }
+
+        // === MOVIMIENTO DEL PERSONAJE ===
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "w") personaje.y -= 10;
+            if (event.key === "s") personaje.y += 10;
+            if (event.key === "a") personaje.x -= 10;
+            if (event.key === "d") personaje.x += 10;
+
+            dibujarTodo();
         });
 
-        // --- DIBUJAR PERSONAJE ---
-        const img = new Image();
-        img.src = personaje.imagen; // debe ser: /static/img/devil.png
-
-        img.onload = () => {
-            ctx.drawImage(img, personaje.x, personaje.y, 60, 60);
-        };
-
-        img.onerror = () => {
-            console.error("NO SE PUDO CARGAR LA IMAGEN:", img.src);
-        };
     </script>
-</body>
 
+</body>
 </html>
