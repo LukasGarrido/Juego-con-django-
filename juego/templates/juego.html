@@ -8,8 +8,8 @@
 </head>
 
 <body>
-    <h1>Camino del Juego</h1>
-    <canvas id="canvas" width="1500" height="800"></canvas>
+    <h1 style="text-align: center;">Camino del Juego</h1>
+    <canvas id="canvas" width="1920" height="1080" style="border: 3px solid black;"></canvas>
 
     <script>
         // === OBTENER CANVAS ===
@@ -56,6 +56,13 @@
             if (event.key === "s") personaje.y += 10;
             if (event.key === "a") personaje.x -= 10;
             if (event.key === "d") personaje.x += 10;
+
+            // === LIMITAR A LOS BORDES DEL CANVAS ===
+            if (personaje.x < 0) personaje.x = 0;  
+            if (personaje.y < 0) personaje.y = 0;  
+
+            if (personaje.x > canvas.width - 50) personaje.x = canvas.width - 50;  
+            if (personaje.y > canvas.height - 50) personaje.y = canvas.height - 50;
 
             dibujarTodo();
         });
