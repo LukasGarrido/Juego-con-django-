@@ -73,21 +73,46 @@ def mover_personaje(personaje, dx, dy):
     return personaje
 
 #Funciones del personaje villano 
-
 def generar_villano():
     list_villanos = ["acertijo.png", "doscaras.png", "joker.png"]
+    villanos_creados = []
+
+    Pared.objects.all().delete()
+    generar_pared()  
+
+    paredes = list(Pared.objects.all())
+
     Villano.objects.all().delete()
 
     for v in list_villanos:
         nombre_villano = v.split(".")[0]
         ruta_villano = "/static/img/" + v
-        X = random.randint(200,500)
-        Y = random.randint(200,1000)
-       
-        return Villano.objects.create(
-            nombre = nombre_villano, 
-            imagen = ruta_villano, 
-            x = X,
-            y = Y
-            )
-    
+        #loop para que el villano no se genere en la misma posicion que una pared.
+        while True:
+            X = random.randint(100, 1700)
+            Y = random.randint(100, 900)
+            choque = False
+            for p in paredes:
+                x1, y1 = map(int, p.inicio.split(","))
+                x2, y2 = map(int, p.final.split(","))
+                grosor = 20  
+                if p.direccion == "H":
+                    if (X < x2 and X+50 > x1) and (Y < y1+grosor and Y+50 > y1):
+                        choque = True
+                        break
+                else:  
+                    if (Y < y2 and Y+50 > y1) and (X < x1+grosor and X+50 > x1):
+                        choque = True
+                        break
+            if not choque:
+                break
+
+        villano = Villano.objects.create(
+            nombre=nombre_villano,
+            imagen=ruta_villano,
+            x=X,
+            y=Y
+        )
+        villanos_creados.append(villano)
+
+    return villanos_creados

@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Pared, Personaje
+from .models import Pared, Personaje, Villano
 from juego.generar_juego.jugando import generar_pared, generar_personaje, generar_villano
 # Create your views here.
 
@@ -21,9 +21,11 @@ def juego(request):
             'y2': y2,
             'direccion': pared.direccion
         })
+    villanos_list = []
+    for villano in Villano.objects.all():
+        villanos_list.append(villano)
 
     personaje = Personaje.objects.first()
-
     personaje_dict = {
         "nombre": personaje.nombre,
         "imagen": personaje.imagen,
@@ -32,16 +34,8 @@ def juego(request):
         "velocidad": personajes.velocidad
     }
 
-    villanos_dict = {
-        "nombre": villanos.nombre,
-        "imagen": villanos.imagen,
-        "x": villanos.x,
-        "y": villanos.y,
-    }
-
-
     return render(request, "juego.html", {
         'paredes': paredes,
         'personaje': personaje_dict,
-        'villanos': villanos_dict,
+        'villanos': villanos_list,
     })
