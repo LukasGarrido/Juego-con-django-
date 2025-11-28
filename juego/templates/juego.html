@@ -8,23 +8,27 @@
 </head>
 
 <body>
-    <h1 style="text-align: center;">Camino del Juego</h1>
+    <h1 style="text-align: center;">Atrapando villanos de batman</h1>
+
     <canvas id="canvas" width="1920" height="1080" style="border: 3px solid black;"></canvas>
 
     <script>
-        // === OBTENER CANVAS ===
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
 
-        // === DATOS DESDE DJANGO ===
+        // datos de django
         const paredes = {{ paredes|safe }};
         const personaje = {
             x: {{ personaje.x }},
             y: {{ personaje.y }},
             imagen: "{{ personaje.imagen }}",
         };
+        const villanos = {
+            x: {{villanos.x}},
+            y: {{villanos.y}},
+            imagen: "{{villanos.imagen}}"
+        };
 
-        // === CARGAR IMAGEN DEL PERSONAJE ===
         const img = new Image();
         img.src = personaje.imagen;
 
@@ -32,11 +36,45 @@
             dibujarTodo();
         };
 
-        // === FUNCIÓN QUE DIBUJA TODAS LAS COSAS ===
+        // detectar colicion 
+        function colisionaConParedes(nx, ny) {
+            const personajeWidth = 50;
+            const personajeHeight = 50;
+
+            for (let p of paredes) {
+
+                // horizontal (y1 == y2)
+                if (p.direccion === "H") {
+                    let x_min = Math.min(p.x1, p.x2);
+                    let x_max = Math.max(p.x1, p.x2);
+
+                    let colision_x = nx + personajeWidth > x_min && nx < x_max;
+                    let colision_y = ny < p.y1 + 5 && ny + personajeHeight > p.y1;
+
+                    if (colision_x && colision_y) {
+                        return true;
+                    }
+                }
+
+                // vertical (x1 == x2)
+                if (p.direccion === "V") {
+                    let y_min = Math.min(p.y1, p.y2);
+                    let y_max = Math.max(p.y1, p.y2);
+
+                    let colision_y = ny + personajeHeight > y_min && ny < y_max;
+                    let colision_x = nx < p.x1 + 5 && nx + personajeWidth > p.x1;
+
+                    if (colision_x && colision_y) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         function dibujarTodo() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Dibujar paredes
             paredes.forEach(p => {
                 ctx.beginPath();
                 ctx.moveTo(p.x1, p.y1);
@@ -46,22 +84,27 @@
                 ctx.stroke();
             });
 
-            // Dibujar personaje
             ctx.drawImage(img, personaje.x, personaje.y, 50, 50);
         }
 
-        // === MOVIMIENTO DEL PERSONAJE ===
         document.addEventListener("keydown", function (event) {
-            if (event.key === "w") personaje.y -= 10;
-            if (event.key === "s") personaje.y += 10;
-            if (event.key === "a") personaje.x -= 10;
-            if (event.key === "d") personaje.x += 10;
 
-            // === LIMITAR A LOS BORDES DEL CANVAS ===
-            if (personaje.x < 0) personaje.x = 0;  
-            if (personaje.y < 0) personaje.y = 0;  
+            let nx = personaje.x;
+            let ny = personaje.y;
 
-            if (personaje.x > canvas.width - 50) personaje.x = canvas.width - 50;  
+            if (event.key === "w") ny -= 10;
+            if (event.key === "s") ny += 10;
+            if (event.key === "a") nx -= 10;
+            if (event.key === "d") nx += 10;
+
+            if (!colisionaConParedes(nx, ny)) {
+                personaje.x = nx;
+                personaje.y = ny;
+            }
+
+            if (personaje.x < 0) personaje.x = 0;
+            if (personaje.y < 0) personaje.y = 0;
+            if (personaje.x > canvas.width - 50) personaje.x = canvas.width - 50;
             if (personaje.y > canvas.height - 50) personaje.y = canvas.height - 50;
 
             dibujarTodo();
@@ -70,4 +113,5 @@
     </script>
 
 </body>
+
 </html>

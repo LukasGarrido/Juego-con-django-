@@ -11,6 +11,15 @@ class Personaje(models.Model):
     def __str__(self):
         return f"{self.nombre} con posicion ({self.x},{self.y})"
 
+class Villano(models.Model):
+    nombre = models.CharField(max_length=200)
+    imagen = models.CharField(max_length=100)
+    x = models.IntegerField()
+    y = models.IntegerField()
+    
+    def __str__(self):
+        return f"{self.nombre} con posicion ({self.x},{self.y})"
+    
 class Pared(models.Model):
     inicio = models.CharField(max_length=10)
     final = models.CharField(max_length=10)

@@ -1,5 +1,5 @@
 import cv2
-from juego.models import Personaje, Pared
+from juego.models import Personaje, Pared, Villano
 import numpy as np
 import random 
 
@@ -8,6 +8,7 @@ def generar_fondo():
     return fondo
 
 #Funciones de las paredes 
+
 def generar_pared():
     Pared.objects.all().delete()
     
@@ -36,16 +37,21 @@ def generar_pared():
     return Pared.objects.all()
 
 #Funciones del personaje  
+
 def generar_personaje():
-    nombre_personaje = "personaje1"
-    ruta = "/static/img/devil.png"
+    nombre_personaje = "batman"
+    ruta = "/static/img/batman.png"
     x = 100
     y = 100
     Personaje.objects.all().delete()
-    return Personaje.objects.create(nombre = nombre_personaje, imagen= ruta, x = x, y = y)
+    return Personaje.objects.create(
+        nombre = nombre_personaje, 
+        imagen= ruta, 
+        x = x, 
+        y = y
+        )
 
 def mover_personaje(personaje, dx, dy):
-    
     nuevo_x = personaje.x + dx
     nuevo_y = personaje.y + dy
 
@@ -58,10 +64,30 @@ def mover_personaje(personaje, dx, dy):
     if nuevo_x < min_x: nuevo_x = min_x
     if nuevo_x > max_x: nuevo_x = max_x
     if nuevo_y < min_y: nuevo_y = min_y
-    if nuevo_y > max_y: nuevo_y = max_y
+    if nuevo_y > max_y: nuevo_y = max_y 
 
     personaje.x = nuevo_x
     personaje.y = nuevo_y
     personaje.save()
 
     return personaje
+
+#Funciones del personaje villano 
+
+def generar_villano():
+    list_villanos = ["acertijo.png", "doscaras.png", "joker.png"]
+    Villano.objects.all().delete()
+
+    for v in list_villanos:
+        nombre_villano = v.split(".")[0]
+        ruta_villano = "/static/img/" + v
+        X = random.randint(200,500)
+        Y = random.randint(200,1000)
+       
+        return Villano.objects.create(
+            nombre = nombre_villano, 
+            imagen = ruta_villano, 
+            x = X,
+            y = Y
+            )
+    
