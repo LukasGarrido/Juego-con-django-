@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta viewport="width=device-width, initial-scale=1.0">
     <title>Juego</title>
 </head>
 
@@ -16,7 +16,6 @@
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
 
-        // === DATOS DESDE DJANGO ===
         const paredes = {{ paredes|safe }};
         const personaje = {
             x: {{ personaje.x }},
@@ -24,74 +23,69 @@
             imagen: "{{ personaje.imagen }}"
         };
 
-        // 🔥 LOS VILLANOS LLEGAN COMO OBJETOS DJANGO SERIALIZADOS POR TEMPLATE
         const villanos = [
             {% for v in villanos %}
-                {
-                    nombre: "{{ v.nombre }}",
-                    imagen: "{{ v.imagen }}",
-                    x: {{ v.x }},
-                    y: {{ v.y }}
-                },
+            {
+                nombre: "{{ v.nombre }}",
+                imagen: "{{ v.imagen }}",
+                x: {{ v.x }},
+                y: {{ v.y }}
+            },
             {% endfor %}
         ];
 
-        // === IMAGEN DEL PERSONAJE ===
         const imgPersonaje = new Image();
         imgPersonaje.src = personaje.imagen;
 
-        // === CARGAR IMÁGENES DE VILLANOS ===
         const imgVillanos = [];
-
         villanos.forEach(v => {
             let iv = new Image();
             iv.src = v.imagen;
-            imgVillanos.push({
-                img: iv,
-                x: v.x,
-                y: v.y
-            });
+            imgVillanos.push({ img: iv, x: v.x, y: v.y });
         });
 
-        imgPersonaje.onload = function () {
-            dibujarTodo();
-        };
+        const fondo = new Image();
+        fondo.src = "/static/img/gotica.png";
 
-        // === DETECTAR COLISIONES ===
+        imgPersonaje.onload = () => dibujarTodo();
+
         function colisionaConParedes(nx, ny) {
-            const w = 50;
-            const h = 50;
+            const w = 50, h = 50;
 
             for (let p of paredes) {
-
                 if (p.direccion === "H") {
                     let xmin = Math.min(p.x1, p.x2);
                     let xmax = Math.max(p.x1, p.x2);
 
-                    let colX = nx + w > xmin && nx < xmax;
-                    let colY = ny < p.y1 + 5 && ny + h > p.y1;
-
-                    if (colX && colY) return true;
+                    if (nx + w > xmin && nx < xmax &&
+                        ny < p.y1 + 5 && ny + h > p.y1)
+                        return true;
                 }
-
                 if (p.direccion === "V") {
                     let ymin = Math.min(p.y1, p.y2);
                     let ymax = Math.max(p.y1, p.y2);
 
-                    let colY = ny + h > ymin && ny < ymax;
-                    let colX = nx < p.x1 + 5 && nx + w > p.x1;
-
-                    if (colX && colY) return true;
+                    if (ny + h > ymin && ny < ymax &&
+                        nx < p.x1 + 5 && nx + w > p.x1)
+                        return true;
                 }
             }
             return false;
         }
 
-        // === DIBUJAR TODO ===
-        function dibujarTodo() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        function dibujarMensajeFin() {
+            ctx.fillStyle = "rgba(0,0,0,0.7)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // paredes
+            ctx.fillStyle = "white";
+            ctx.font = "80px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("🎉 ¡FIN DEL JUEGO! 🎉", canvas.width / 2, canvas.height / 2);
+        }
+
+        function dibujarTodo() {
+            ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+
             paredes.forEach(p => {
                 ctx.beginPath();
                 ctx.moveTo(p.x1, p.y1);
@@ -101,20 +95,29 @@
                 ctx.stroke();
             });
 
-            // 🔥 VILLANOS (SE QUEDAN QUIETOS)
             imgVillanos.forEach(v => {
                 ctx.drawImage(v.img, v.x, v.y, 50, 50);
             });
 
-            // personaje
             ctx.drawImage(imgPersonaje, personaje.x, personaje.y, 50, 50);
+
+            if (imgVillanos.length === 0) {
+                dibujarMensajeFin();
+            }
         }
 
-        // === MOVIMIENTO ===
+        function colisionaConVillano(v) {
+            return (
+                personaje.x < v.x + 50 &&
+                personaje.x + 50 > v.x &&
+                personaje.y < v.y + 50 &&
+                personaje.y + 50 > v.y
+            );
+        }
+
         document.addEventListener("keydown", function (event) {
 
-            let nx = personaje.x;
-            let ny = personaje.y;
+            let nx = personaje.x, ny = personaje.y;
 
             if (event.key === "w") ny -= 10;
             if (event.key === "s") ny += 10;
@@ -131,11 +134,16 @@
             if (personaje.x > canvas.width - 50) personaje.x = canvas.width - 50;
             if (personaje.y > canvas.height - 50) personaje.y = canvas.height - 50;
 
+            for (let i = imgVillanos.length - 1; i >= 0; i--) {
+                if (colisionaConVillano(imgVillanos[i])) {
+                    imgVillanos.splice(i, 1);
+                }
+            }
+
             dibujarTodo();
         });
 
     </script>
 
 </body>
-
 </html>

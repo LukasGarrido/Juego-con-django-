@@ -9,7 +9,7 @@ def inicio(request):
 def juego(request):
     generar_pared()
     personajes = generar_personaje()
-    villanos = generar_villano()
+    generar_villano()
     paredes = []
     for pared in Pared.objects.all():
         x1, y1 = map(int, pared.inicio.split(','))

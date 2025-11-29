@@ -39,11 +39,12 @@ def generar_pared():
 #Funciones del personaje  
 
 def generar_personaje():
+    Personaje.objects.all().delete()
+
     nombre_personaje = "batman"
-    ruta = "/static/img/batman.png"
+    ruta = "/static/img/batman1.png"
     x = 100
     y = 100
-    Personaje.objects.all().delete()
     return Personaje.objects.create(
         nombre = nombre_personaje, 
         imagen= ruta, 
@@ -74,7 +75,7 @@ def mover_personaje(personaje, dx, dy):
 
 #Funciones del personaje villano 
 def generar_villano():
-    list_villanos = ["acertijo.png", "doscaras.png", "joker.png"]
+    list_villanos = ["acertijo1.png", "doscaras1.png", "joker1.png"]
     villanos_creados = []
 
     Pared.objects.all().delete()
@@ -87,7 +88,7 @@ def generar_villano():
     for v in list_villanos:
         nombre_villano = v.split(".")[0]
         ruta_villano = "/static/img/" + v
-        #loop para que el villano no se genere en la misma posicion que una pared.
+        #loop para que el villano no se genere en la misma posicion que una pared.(que no aparezca sobre la pared xd)
         while True:
             X = random.randint(100, 1700)
             Y = random.randint(100, 900)
